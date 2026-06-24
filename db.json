@@ -1,0 +1,12 @@
+{
+  "bills": [
+    {
+      "consumerNumber": "1234",
+      "billingMonth": "2026-07",
+      "tariffCategory": "Domestic",
+      "unitsConsumed": "200",
+      "id": "bRv4Ocr_IX8"
+    }
+  ],
+  "$schema": "./node_modules/json-server/schema.json"
+}
