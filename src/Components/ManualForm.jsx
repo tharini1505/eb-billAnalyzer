@@ -1,12 +1,11 @@
 import { useState } from "react"
 
-function ManualForm({ setLoading }) {
+function ManualForm({ setLoading, setResult }) {
   const [consumerNumber, setConsumerNumber] = useState("")
   const [billingMonth, setBillingMonth] = useState("")
   const [tariffCategory, setTariffCategory] = useState("Domestic")
   const [unitsConsumed, setUnitsConsumed] = useState("")
   const [error, setError] = useState("")
-  const [result, setResult] = useState(null)
 
   const handle = async () => {
     setError("")
@@ -16,33 +15,43 @@ function ManualForm({ setLoading }) {
       return
     }
 
-    const billData = {
-      consumerNumber,
-      billingMonth,
-      tariffCategory,
-      unitsConsumed
-    }
-
     try {
       setLoading(true)
 
-      const response = await fetch("http://localhost:3000/bills", {
+      const formData = new FormData()
+      formData.append("user_id", "1")
+      formData.append("consumer_number", consumerNumber)
+      formData.append("bill_month", billingMonth)
+      formData.append("tariff_category", tariffCategory)
+      formData.append("units_consumed", unitsConsumed)
+
+      const response = await fetch("https://project-1-fdwi.onrender.com/upload-bill", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify(billData)
+        body: formData
       })
 
+      const data = await response.json()
+      console.log("MANUAL BILL RESPONSE:", data)
+
       if (!response.ok) {
-        throw new Error("Failed to save bill")
+        const detailText =
+          typeof data?.detail === "string"
+            ? data.detail
+            : JSON.stringify(data?.detail || "")
+
+        if (detailText.includes("429") || detailText.includes("RESOURCE_EXHAUSTED")) {
+          throw new Error(
+            "AI usage limit reached on the backend. Please wait a bit and try again, or ask your backend teammate to add a fallback when Gemini quota is exhausted."
+          )
+        }
+
+        throw new Error(detailText || "Failed to analyze bill")
       }
 
-      const data = await response.json()
       setResult(data)
     } catch (err) {
-      console.log(err)
-      setError("Could not connect to JSON server")
+      console.log("Manual form error:", err)
+      setError(err.message || "Could not connect to backend")
     } finally {
       setLoading(false)
     }
@@ -50,12 +59,12 @@ function ManualForm({ setLoading }) {
 
   return (
     <div className="manualform">
-      <h2>Enter Bill details</h2>
+      <h2>Enter Bill Details</h2>
 
       {error && <p className="error">{error}</p>}
 
       <div className="inputmanual">
-        <label>Consumer Number:</label>
+        <label>Consumer Number</label>
         <input
           type="text"
           placeholder="Enter consumer number"
@@ -65,7 +74,7 @@ function ManualForm({ setLoading }) {
       </div>
 
       <div className="inputmanual">
-        <label>Billing month:</label>
+        <label>Billing Month</label>
         <input
           type="month"
           value={billingMonth}
@@ -74,7 +83,7 @@ function ManualForm({ setLoading }) {
       </div>
 
       <div className="inputmanual">
-        <label>Tariff Category:</label>
+        <label>Tariff Category</label>
         <select
           value={tariffCategory}
           onChange={(e) => setTariffCategory(e.target.value)}
@@ -89,24 +98,15 @@ function ManualForm({ setLoading }) {
         <label>Units Consumed (kWh)</label>
         <input
           type="number"
-          placeholder="Units consumed"
+          placeholder="Enter units consumed"
           value={unitsConsumed}
           onChange={(e) => setUnitsConsumed(e.target.value)}
         />
       </div>
 
-      <button onClick={handle}>Analyze Bill</button>
-
-      {result && (
-        <div className="result-box">
-          <h3>Saved Bill</h3>
-          <p><strong>ID:</strong> {result.id}</p>
-          <p><strong>Consumer Number:</strong> {result.consumerNumber}</p>
-          <p><strong>Billing Month:</strong> {result.billingMonth}</p>
-          <p><strong>Tariff Category:</strong> {result.tariffCategory}</p>
-          <p><strong>Units Consumed:</strong> {result.unitsConsumed}</p>
-        </div>
-      )}
+      <button className="analyze-btn" onClick={handle}>
+        Analyze Bill
+      </button>
     </div>
   )
 }

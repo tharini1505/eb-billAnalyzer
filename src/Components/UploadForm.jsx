@@ -1,71 +1,67 @@
-import { useState } from "react";
-function UploadForm({ setLoading }) {
-  const [file, setFile] = useState(null);
-  const [error, setError] = useState("");
-  const [result, setResult] = useState(null);
+import { useState } from "react"
+
+function UploadForm({ setLoading, setResult }) {
+  const [file, setFile] = useState(null)
+  const [error, setError] = useState("")
 
   const handle = async () => {
-    setError("");
+    setError("")
 
     if (!file) {
-      setError("Please upload a file");
-      return;
+      setError("Please upload a bill file")
+      return
     }
 
     try {
-      setLoading(true);
+      setLoading(true)
 
-      const response = await fetch("http://localhost:3000/bills", {
+      const formData = new FormData()
+      formData.append("user_id", "1")
+      formData.append("file", file)
+
+      const response = await fetch("https://project-1-19.onrender.com/upload-bill/", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-          fileName: file.name,
-          status: "pending"
-        })
-      });
+        body: formData
+      })
+
+      const data = await response.json()
 
       if (!response.ok) {
-        throw new Error("Failed to save file");
+        throw new Error(data.detail || "Failed to upload bill")
       }
 
-      const data = await response.json();
-      setResult(data);
+      setResult(data)
     } catch (err) {
-      console.log(err);
-      setError("Could not connect to backend");
+      console.log(err)
+      setError(err.message || "Could not connect to backend")
+      setLoading(false)
     } finally {
-      setLoading(false);
+      setLoading(false)
     }
-  };
+  }
 
   return (
-    <div className="form">
+    <div className="manualform">
       <h2>Upload Your Electricity Bill</h2>
 
-      {error && <p>{error}</p>}
+      {error && <p className="error">{error}</p>}
 
-      <input
-        type="file"
-        accept=".pdf,.jpg,.jpeg,.png"
-        onChange={(e) => setFile(e.target.files[0])}
-      />
+      <div className="inputmanual">
+        <label htmlFor="billFile">Upload Bill File</label>
+        <input
+          id="billFile"
+          name="billFile"
+          type="file"
+          accept=".pdf,.jpg,.jpeg,.png"
+          onChange={(e) => setFile(e.target.files[0])}
+        />
+      </div>
 
-      <button onClick={handle}>
+      <button className="submit-btn" onClick={handle}>
         Analyze Bill
       </button>
-
-      {result && (
-        <div className="result-box">
-          <h3>Bill Uploaded Successfully</h3>
-          <p><strong>ID:</strong> {result.id}</p>
-          <p><strong>File Name:</strong> {result.fileName}</p>
-          <p><strong>Status:</strong> {result.status}</p>
-        </div>
-      )}
     </div>
-  );
+  )
 }
 
-export default UploadForm;
+export default UploadForm
