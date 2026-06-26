@@ -10,7 +10,12 @@ function ManualForm({ setLoading, setResult }) {
   const handle = async () => {
     setError("")
 
-    if (!consumerNumber || !billingMonth || !tariffCategory || !unitsConsumed) {
+    if (
+      !consumerNumber ||
+      !billingMonth ||
+      !tariffCategory ||
+      !unitsConsumed
+    ) {
       setError("Please fill all the fields")
       return
     }
@@ -23,11 +28,15 @@ function ManualForm({ setLoading, setResult }) {
       formData.append("user_id", "1")
       formData.append("consumer_number", consumerNumber)
 
-      // Backend expects YYYY-MM-DD
-      formData.append("bill_month", `${billingMonth}-01`)
+      // Convert YYYY-MM -> YYYY-MM-01
+      const formattedDate = `${billingMonth}-01`
+      formData.append("bill_month", formattedDate)
 
       formData.append("tariff_category", tariffCategory)
-      formData.append("units_consumed", unitsConsumed)
+      formData.append("units_consumed", Number(unitsConsumed))
+
+      // DEBUG
+      console.log("Sending bill_month:", formattedDate)
 
       const response = await fetch(
         "https://project-1-3-n0oe.onrender.com/upload-bill",
@@ -42,17 +51,13 @@ function ManualForm({ setLoading, setResult }) {
       console.log("MANUAL BILL RESPONSE:", data)
 
       if (!response.ok) {
-        throw new Error(
-          typeof data.detail === "string"
-            ? data.detail
-            : JSON.stringify(data.detail)
-        )
+        throw new Error(JSON.stringify(data.detail))
       }
 
       setResult(data)
     } catch (err) {
       console.error("Manual form error:", err)
-      setError(err.message || "Failed to connect to backend")
+      setError(err.message || "Something went wrong")
     } finally {
       setLoading(false)
     }
@@ -68,9 +73,9 @@ function ManualForm({ setLoading, setResult }) {
         <label>Consumer Number</label>
         <input
           type="text"
-          placeholder="Enter consumer number"
           value={consumerNumber}
           onChange={(e) => setConsumerNumber(e.target.value)}
+          placeholder="Enter Consumer Number"
         />
       </div>
 
@@ -96,12 +101,12 @@ function ManualForm({ setLoading, setResult }) {
       </div>
 
       <div className="inputmanual">
-        <label>Units Consumed (kWh)</label>
+        <label>Units Consumed</label>
         <input
           type="number"
-          placeholder="Enter units consumed"
           value={unitsConsumed}
           onChange={(e) => setUnitsConsumed(e.target.value)}
+          placeholder="Enter Units"
         />
       </div>
 
