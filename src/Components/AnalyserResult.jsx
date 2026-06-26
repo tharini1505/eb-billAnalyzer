@@ -32,7 +32,7 @@ function AnalyserResult({ result, handleBackToHome }) {
         setHistoryError("")
 
         const response = await fetch(
-          `https://project-1-fdwi.onrender.com/history/${userId}`
+          `https://project-1-3-n0oe.onrender.com/history/${userId}`
         )
 
         if (!response.ok) {
@@ -53,7 +53,7 @@ function AnalyserResult({ result, handleBackToHome }) {
       try {
         setCompareError("")
 
-        const compareUrl = `https://project-1-fdwi.onrender.com/compare?area=${area}&units=${result.units_consumed}`
+        const compareUrl = `https://project-1-3-n0oe.onrender.com/compare?area=${area}&units=${result.units_consumed}`
         console.log("COMPARE URL:", compareUrl)
 
         const response = await fetch(compareUrl)
@@ -77,7 +77,7 @@ function AnalyserResult({ result, handleBackToHome }) {
         setTipsError("")
 
         const response = await fetch(
-          `https://project-1-fdwi.onrender.com/tips/${userId}`
+          `https://project-1-3-n0oe.onrender.com/tips/${userId}`
         )
 
         if (!response.ok) {

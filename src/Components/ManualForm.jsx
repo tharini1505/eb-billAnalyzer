@@ -25,7 +25,7 @@ function ManualForm({ setLoading, setResult }) {
       formData.append("tariff_category", tariffCategory)
       formData.append("units_consumed", unitsConsumed)
 
-      const response = await fetch("https://project-1-2-rgas.onrender.com/upload-bill", {
+      const response = await fetch("https://project-1-3-n0oe.onrender.com", {
         method: "POST",
         body: formData
       })
