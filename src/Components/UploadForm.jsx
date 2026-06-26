@@ -19,7 +19,7 @@ function UploadForm({ setLoading, setResult }) {
       formData.append("user_id", "1")
       formData.append("file", file)
 
-      const response = await fetch("https://project-1-2-rgas.onrender.com/upload-bill/", {
+      const response = await fetch("https://project-1-2-rgas.onrender.com/upload-bill", {
         method: "POST",
         body: formData
       })
