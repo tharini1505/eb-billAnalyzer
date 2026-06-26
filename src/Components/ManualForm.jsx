@@ -19,39 +19,40 @@ function ManualForm({ setLoading, setResult }) {
       setLoading(true)
 
       const formData = new FormData()
+
       formData.append("user_id", "1")
       formData.append("consumer_number", consumerNumber)
-      formData.append("bill_month", billingMonth)
+
+      // Backend expects YYYY-MM-DD
+      formData.append("bill_month", `${billingMonth}-01`)
+
       formData.append("tariff_category", tariffCategory)
       formData.append("units_consumed", unitsConsumed)
 
-      const response = await fetch("https://project-1-3-n0oe.onrender.com", {
-        method: "POST",
-        body: formData
-      })
+      const response = await fetch(
+        "https://project-1-3-n0oe.onrender.com/upload-bill",
+        {
+          method: "POST",
+          body: formData,
+        }
+      )
 
       const data = await response.json()
+
       console.log("MANUAL BILL RESPONSE:", data)
 
       if (!response.ok) {
-        const detailText =
-          typeof data?.detail === "string"
+        throw new Error(
+          typeof data.detail === "string"
             ? data.detail
-            : JSON.stringify(data?.detail || "")
-
-        if (detailText.includes("429") || detailText.includes("RESOURCE_EXHAUSTED")) {
-          throw new Error(
-            "AI usage limit reached on the backend. Please wait a bit and try again, or ask your backend teammate to add a fallback when Gemini quota is exhausted."
-          )
-        }
-
-        throw new Error(detailText || "Failed to analyze bill")
+            : JSON.stringify(data.detail)
+        )
       }
 
       setResult(data)
     } catch (err) {
-      console.log("Manual form error:", err)
-      setError(err.message || "Could not connect to backend")
+      console.error("Manual form error:", err)
+      setError(err.message || "Failed to connect to backend")
     } finally {
       setLoading(false)
     }
