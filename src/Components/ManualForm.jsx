@@ -1,87 +1,161 @@
 import { useState } from "react"
 
-function ManualForm({ setLoading, setResult }) {
+function ManualForm({loading, setLoading, setResult,text}) {
   const [consumerNumber, setConsumerNumber] = useState("")
   const [billingMonth, setBillingMonth] = useState("")
   const [tariffCategory, setTariffCategory] = useState("Domestic")
   const [unitsConsumed, setUnitsConsumed] = useState("")
   const [error, setError] = useState("")
-
+  const [success, setSuccess] = useState(false)
+  const handleKeyDown = (e) => {
+  if (e.key === "Enter") {
+    handle()
+  }
+}
   const handle = async () => {
-    setError("")
+  setError("")
 
-    if (
-      !consumerNumber ||
-      !billingMonth ||
-      !tariffCategory ||
-      !unitsConsumed
-    ) {
-      setError("Please fill all the fields")
-      return
-    }
+  // Empty fields validation
+  if (
+    !consumerNumber ||
+    !billingMonth ||
+    !tariffCategory ||
+    !unitsConsumed
+  ) {
+    setError(text.requiredFields)
+    return
+  }
 
-    try {
-      setLoading(true)
+  // Consumer Number Validation
+  if (!/^\d{10}$/.test(consumerNumber)) {
+    setError(text.invalidConsumer)
+    return
+  }
 
-      const formData = new FormData()
+  const validRegionCodes = [
+    "01","02","03","04","05",
+    "06","07","08","09","10"
+  ]
 
-      formData.append("user_id", "1")
-      formData.append("consumer_number", consumerNumber)
+  const regionCode = consumerNumber.substring(0, 2)
 
-      // Convert YYYY-MM -> YYYY-MM-01
-      const formattedDate = `${billingMonth}-01`
-      formData.append("bill_month", formattedDate)
+  if (!validRegionCodes.includes(regionCode)) {
+    setError(text.invalidConsumer)
+    return
+  }
 
-      formData.append("tariff_category", tariffCategory)
-      formData.append("units_consumed", Number(unitsConsumed))
+  // Units validation
+  if (Number(unitsConsumed) <= 0) {
+    setError(text.invalidUnits)
+    return
+  }
 
-      // DEBUG
-      console.log("Sending bill_month:", formattedDate)
+  try {
+    setLoading(true)
 
-      const response = await fetch(
-        "https://project-1-3-n0oe.onrender.com/upload-bill",
-        {
-          method: "POST",
-          body: formData,
-        }
-      )
+    const formData = new FormData()
 
-      const data = await response.json()
+    formData.append("consumer_number", consumerNumber)
+    formData.append("bill_month", `${billingMonth}-01`)
+    formData.append("tariff_category", tariffCategory)
+    formData.append("units_consumed", Number(unitsConsumed))
 
-      console.log("MANUAL BILL RESPONSE:", data)
-
-      if (!response.ok) {
-        throw new Error(JSON.stringify(data.detail))
+    const response = await fetch(
+      "https://project-1-7-0who.onrender.com/upload-bill",
+      {
+        method: "POST",
+        body: formData,
       }
+    )
 
-      setResult(data)
-    } catch (err) {
-      console.error("Manual form error:", err)
-      setError(err.message || "Something went wrong")
-    } finally {
-      setLoading(false)
+    const data = await response.json()
+
+    if (!response.ok) {
+      throw new Error(
+        data.detail
+          ? JSON.stringify(data.detail)
+          :  text.analysisFailed
+      )
     }
+
+    setSuccess(true)
+
+        setTimeout(() => {
+        setSuccess(false)
+        setResult(data)
+    }, 1000)
+
+  } catch (err) {
+    console.error(err)
+    setError(err.message || text.somethingWrong)
+  } finally {
+    setLoading(false)
+  }
+}
+  if (success) {
+  return (
+    <div className="manualform success-screen">
+      <div className="success-icon">✅</div>
+
+      <h2>{text.success}</h2>
+      <p>{text.preparing}</p>
+    </div>
+  )
   }
 
   return (
     <div className="manualform">
-      <h2>Enter Bill Details</h2>
+     <h2>{text.enterBillDetails}</h2>
 
       {error && <p className="error">{error}</p>}
 
       <div className="inputmanual">
-        <label>Consumer Number</label>
-        <input
-          type="text"
-          value={consumerNumber}
-          onChange={(e) => setConsumerNumber(e.target.value)}
-          placeholder="Enter Consumer Number"
-        />
+        <label>
+            {text.consumerNumber} <span className="required">*</span>
+        </label>
+
+        <input autoFocus
+            autoComplete="off"
+            onKeyDown={handleKeyDown}
+            type="text"
+            placeholder={text.consumerExample}
+            maxLength={10}
+            value={consumerNumber}
+            onChange={(e) => {
+            const value = e.target.value.replace(/\D/g, "")
+            setConsumerNumber(value)
+          }}
+          />
+
+        <small className="helper-text">
+          {text.consumerHelper}
+        </small>
+
+<div className="region-card">
+  <h4>{text.regionReference}</h4>
+
+  <ul>
+    <li><strong>01</strong> → {text.chennaiNorth}</li>
+    <li><strong>02</strong> → {text.chennaiSouth}</li>
+    <li><strong>03</strong> → {text.coimbatore}</li>
+    <li><strong>04</strong> → {text.madurai}</li>
+    <li><strong>05</strong> → {text.thanjavur}</li>
+    <li><strong>06</strong> → {text.trichy}</li>
+    <li><strong>07</strong> → {text.salem}</li>
+    <li><strong>08</strong> → {text.tirunelveli}</li>
+    <li><strong>09</strong> → {text.vellore}</li>
+    <li><strong>10</strong> → {text.erode}</li>
+  </ul>
+</div>
       </div>
 
       <div className="inputmanual">
-        <label>Billing Month</label>
+        <label>
+            {text.billingMonth} <span className="required">*</span>
+        </label>
+
         <input
+          onKeyDown={handleKeyDown}
           type="month"
           value={billingMonth}
           onChange={(e) => setBillingMonth(e.target.value)}
@@ -89,29 +163,40 @@ function ManualForm({ setLoading, setResult }) {
       </div>
 
       <div className="inputmanual">
-        <label>Tariff Category</label>
+        <label>
+            {text.tariffCategory} <span className="required">*</span>
+        </label>
+
         <select
-          value={tariffCategory}
-          onChange={(e) => setTariffCategory(e.target.value)}
-        >
-          <option value="Domestic">Domestic</option>
-          <option value="Commercial">Commercial</option>
-          <option value="Industrial">Industrial</option>
-        </select>
+  onKeyDown={handleKeyDown}
+  value={tariffCategory}
+  onChange={(e) => setTariffCategory(e.target.value)}
+>
+  <option value="Domestic">{text.domestic}</option>
+  <option value="Commercial">{text.commercial}</option>
+  <option value="Industrial">{text.industrial}</option>
+</select>
       </div>
 
       <div className="inputmanual">
-        <label>Units Consumed</label>
+        <label>
+            {text.unitsConsumed} <span className="required">*</span>
+        </label>
         <input
+          onKeyDown={handleKeyDown}
           type="number"
+          min = "1"
+          placeholder={text.unitsExample}
           value={unitsConsumed}
-          onChange={(e) => setUnitsConsumed(e.target.value)}
-          placeholder="Enter Units"
+          onChange={(e) => {
+            if (Number(e.target.value) >= 0)
+              setUnitsConsumed(e.target.value)
+            }}
         />
       </div>
 
-      <button className="analyze-btn" onClick={handle}>
-        Analyze Bill
+      <button className="analyze-btn"  onClick={handle} disabled={loading}>
+          {loading ? text.analyzing : text.analyzeBill}
       </button>
     </div>
   )

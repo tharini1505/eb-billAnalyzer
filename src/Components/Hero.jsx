@@ -1,11 +1,19 @@
-function Hero() {
+function Hero({ text, language, setLanguage }) {
   return (
     <div className="hero">
+      <div className="language-switch">
+        <button
+          onClick={() =>
+            setLanguage(language === "en" ? "ta" : "en")
+          }
+        >
+          {language === "en" ? "தமிழ்" : "English"}
+        </button>
+      </div>
+
       <div className="hero-content">
-        <h1>AI Electricity Bill Analyzer</h1>
-        <p>
-          Cut your cost by using AI integrated Electricity Bill Analyzer
-        </p>
+        <h1>{text.homeTitle}</h1>
+        <p>{text.homeSubtitle}</p>
       </div>
     </div>
   )

@@ -1,15 +1,15 @@
-function InputSelection({ setMode }) {
+function InputSelection({ setMode, text }) {
   return (
     <div className="selection-container">
-      <h2>Choose Input Method</h2>
+      <h2>{text.selectInputMethod}</h2>
 
       <div className="selection-buttons">
-        <button className="mode-btn" onClick={() => setMode("upload")}>
-          Upload Bill
+        <button onClick={() => setMode("upload")}> 
+          {text.uploadBill}
         </button>
 
-        <button className="mode-btn" onClick={() => setMode("manual")}>
-          Manual Upload
+        <button onClick={() => setMode("manual")}>
+          {text.manualEntry}
         </button>
       </div>
     </div>

@@ -1,5 +1,8 @@
 import { useState } from "react"
+import en from "./language/en"
+import ta from "./language/ta"
 import "./App.css"
+
 import InputSelection from "./Components/InputSelection"
 import UploadForm from "./Components/UploadForm"
 import ManualForm from "./Components/ManualForm"
@@ -11,6 +14,10 @@ function App() {
   const [loading, setLoading] = useState(false)
   const [result, setResult] = useState(null)
   const [showDashboard, setShowDashboard] = useState(false)
+
+  // Language State
+  const [language, setLanguage] = useState("en")
+  const text = language === "en" ? en : ta
 
   const handleBackToHome = () => {
     setMode("")
@@ -31,10 +38,22 @@ function App() {
     <div className="app">
       {!result && !showDashboard && (
         <div className="hero">
-          <div className="hero-content">
-            <h1>AI Electricity Bill Analyzer</h1>
-            <p>Cut your cost by using AI integrated Electricity Bill Analyzer</p>
+
+          <div className="language-switch">
+            <button
+              onClick={() =>
+                setLanguage(language === "en" ? "ta" : "en")
+              }
+            >
+              {language === "en" ? "தமிழ்" : "English"}
+            </button>
           </div>
+
+          <div className="hero-content">
+            <h1>{text.homeTitle}</h1>
+            <p>{text.homeSubtitle}</p>
+          </div>
+
         </div>
       )}
 
@@ -42,26 +61,40 @@ function App() {
         {loading ? (
           <div className="loading-box">
             <div className="spinner"></div>
-            <p>Analyzing your bill...</p>
+            <p>{text.analyzing}</p>
           </div>
         ) : showDashboard ? (
           <Dashboard
             result={result}
             handleBackToResult={handleBackToResult}
             handleBackToHome={handleBackToHome}
+            text={text}
           />
         ) : result ? (
           <AnalyserResult
             result={result}
             handleBackToHome={handleBackToHome}
             handleViewDashboard={handleViewDashboard}
+            text={text}
           />
         ) : mode === "" ? (
-          <InputSelection setMode={setMode} />
+          <InputSelection
+            setMode={setMode}
+            text={text}
+          />
         ) : mode === "upload" ? (
-          <UploadForm setLoading={setLoading} setResult={setResult} />
+          <UploadForm
+            setLoading={setLoading}
+            setResult={setResult}
+            text={text}
+          />
         ) : mode === "manual" ? (
-          <ManualForm setLoading={setLoading} setResult={setResult} />
+          <ManualForm
+            loading={loading}
+            setLoading={setLoading}
+            setResult={setResult}
+            text={text}
+          />
         ) : null}
       </div>
     </div>

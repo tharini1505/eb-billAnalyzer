@@ -1,6 +1,6 @@
 import { useState } from "react"
 
-function UploadForm({ setLoading, setResult }) {
+function UploadForm({ setLoading, setResult, text }) {
   const [file, setFile] = useState(null)
   const [error, setError] = useState("")
 
@@ -8,7 +8,7 @@ function UploadForm({ setLoading, setResult }) {
     setError("")
 
     if (!file) {
-      setError("Please upload a bill file")
+      setError(text.uploadPdfError)
       return
     }
 
@@ -16,11 +16,12 @@ function UploadForm({ setLoading, setResult }) {
       setLoading(true)
 
       const formData = new FormData()
-      formData.append("user_id", "1")
       formData.append("file", file)
 
+      console.log("Uploading:", file.name)
+
       const response = await fetch(
-        "https://project-1-3-n0oe.onrender.com/upload-bill",
+        "https://project-1-7-0who.onrender.com/upload-bill",
         {
           method: "POST",
           body: formData,
@@ -33,16 +34,16 @@ function UploadForm({ setLoading, setResult }) {
 
       if (!response.ok) {
         throw new Error(
-          typeof data.detail === "string"
-            ? data.detail
-            : JSON.stringify(data.detail)
+          data.detail
+          ? JSON.stringify(data.detail)
+          : text.analysisFailed
         )
       }
 
       setResult(data)
     } catch (err) {
-      console.error("Upload error:", err)
-      setError(err.message || "Could not connect to backend")
+      console.error("Upload Error:", err)
+      setError(err.message || text.backendError)
     } finally {
       setLoading(false)
     }
@@ -50,23 +51,27 @@ function UploadForm({ setLoading, setResult }) {
 
   return (
     <div className="manualform">
-      <h2>Upload Your Electricity Bill</h2>
+      <h2>{text.uploadYourBill}</h2>
 
       {error && <p className="error">{error}</p>}
 
       <div className="inputmanual">
-        <label htmlFor="billFile">Upload Bill File</label>
+        <label htmlFor="billFile">{text.uploadPdfBill}</label>
 
         <input
           id="billFile"
           type="file"
-          accept=".pdf,.jpg,.jpeg,.png"
+          accept=".pdf"
           onChange={(e) => setFile(e.target.files[0])}
         />
+        {file && (<p className="helper-text">
+                    📄 {file.name}
+                  </p>
+)}
       </div>
 
-      <button className="analyze-btn" onClick={handle}>
-        Analyze Bill
+      <button className="analyze-btn" onClick={handle} disabled={file === null}>
+            {text.analyzeBill}
       </button>
     </div>
   )
