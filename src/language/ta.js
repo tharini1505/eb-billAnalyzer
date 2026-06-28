@@ -144,7 +144,6 @@ locale: "ta-IN",
 
 domestic: "வீட்டு",
 commercial: "வணிக",
-industrial: "தொழில்துறை",
 
 // ---------- Success Screen ----------
 

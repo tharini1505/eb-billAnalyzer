@@ -364,32 +364,6 @@ const tamilSavingTips = [
 
         </div>
 
-        {/* SAVING TIPS */}
-
-        <div className="section-card">
-
-          <h2>{text.savingTips}</h2>
-
-          {result.saving_tips &&
-          result.saving_tips.length > 0 ? (
-
-            <ul className="tips-list">
-
-              {(text.locale === "ta-IN"? tamilSavingTips: result.saving_tips
-                ).map((tip,index)=>(
-                    <li key={index}>{tip}</li>
-              ))}
-
-            </ul>
-
-          ) : (
-
-            <p>{text.noSavingTips}</p>
-
-          )}
-
-        </div>
-
         {/* HISTORY */}
 
         <div className="section-card">
@@ -572,6 +546,31 @@ const tamilSavingTips = [
               </div>
 
             </>
+
+          )}
+
+        </div>
+        {/* SAVING TIPS */}
+
+        <div className="section-card">
+
+          <h2>{text.savingTips}</h2>
+
+          {result.saving_tips &&
+          result.saving_tips.length > 0 ? (
+
+            <ul className="tips-list">
+
+              {(text.locale === "ta-IN"? tamilSavingTips: result.saving_tips
+                ).map((tip,index)=>(
+                    <li key={index}>{tip}</li>
+              ))}
+
+            </ul>
+
+          ) : (
+
+            <p>{text.noSavingTips}</p>
 
           )}
 

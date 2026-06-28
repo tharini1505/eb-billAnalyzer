@@ -59,7 +59,7 @@ function ManualForm({loading, setLoading, setResult,text}) {
     formData.append("bill_month", `${billingMonth}-01`)
     formData.append("tariff_category", tariffCategory)
     formData.append("units_consumed", Number(unitsConsumed))
-
+    console.log("Tariff Category:", tariffCategory)
     const response = await fetch(
       "https://project-1-7-0who.onrender.com/upload-bill",
       {
@@ -167,14 +167,11 @@ function ManualForm({loading, setLoading, setResult,text}) {
             {text.tariffCategory} <span className="required">*</span>
         </label>
 
-        <select
-  onKeyDown={handleKeyDown}
-  value={tariffCategory}
-  onChange={(e) => setTariffCategory(e.target.value)}
->
+        <select onKeyDown={handleKeyDown}
+                value={tariffCategory}
+                onChange={(e) => setTariffCategory(e.target.value)}>
   <option value="Domestic">{text.domestic}</option>
   <option value="Commercial">{text.commercial}</option>
-  <option value="Industrial">{text.industrial}</option>
 </select>
       </div>
 

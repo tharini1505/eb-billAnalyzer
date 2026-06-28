@@ -155,7 +155,6 @@ highUsageMessage:
 backToResult: "Back to Result",
 domestic: "Domestic",
 commercial: "Commercial",
-industrial: "Industrial",
 region: "Region",
 }
 
